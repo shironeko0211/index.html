@@ -1,7 +1,870 @@
-echo "# index.html" >> README.md
-git init
-git add README.md
-git commit -m "最初のコミット"
-git ブランチ -M メイン
-git リモートでオリジンを追加 https://github.com/shironeko0211/index.html.git
-git push -u origin main
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LevelUp Study</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #f5f2ee;
+  --card: #ffffff;
+  --border: #e2ddd8;
+  --text: #1a1714;
+  --muted: #9a9390;
+  --accent: #c0392b;
+  --accent-light: rgba(192,57,43,0.08);
+  --accent2: #2d6a4f;
+  --gold: #b8860b;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* NAV TABS */
+.nav {
+  display: flex;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-btn {
+  flex: 1;
+  padding: 14px 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* PAGES */
+.page { display: none; padding: 20px 16px 80px; }
+.page.active { display: block; }
+
+/* PLAYER HEADER */
+.player-header {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.avatar-wrap {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.player-meta { flex: 1; min-width: 0; }
+.player-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+.level-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.xp-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 5px; font-family: 'DM Mono', monospace; }
+.xp-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.xp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+/* STATS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent2); }
+.stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.04em; }
+
+/* SECTION LABEL */
+.sec-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* TIMER CARD */
+.timer-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.subject-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.pill {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.pill:hover { border-color: var(--accent); color: var(--text); }
+.pill.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+.pill.add-pill { color: var(--muted); border-style: dashed; }
+
+.timer-face {
+  font-family: 'DM Mono', monospace;
+  font-size: 56px;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 4px;
+  transition: color 0.3s;
+}
+.timer-face.running { color: var(--accent2); }
+.timer-sub {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 22px;
+  font-family: 'DM Mono', monospace;
+}
+
+.timer-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-primary {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 13px 36px;
+  border-radius: 40px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn-primary:hover { opacity: 0.88; transform: scale(1.02); }
+.btn-secondary {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 13px 22px;
+  border-radius: 40px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: none;
+  transition: all 0.15s;
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+/* SKILLS */
+.skills-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+.skill-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.skill-row:last-child { margin-bottom: 0; }
+.skill-name { font-size: 13px; width: 80px; flex-shrink: 0; }
+.skill-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.skill-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 2px; transition: width 0.8s ease; }
+.skill-pct { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); width: 30px; text-align: right; }
+
+/* SESSION LOG */
+.log-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.log-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.log-item:last-child { border-bottom: none; }
+.log-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; margin-right: 10px; }
+.log-left { display: flex; align-items: center; }
+.log-subject { font-size: 13px; font-weight: 500; }
+.log-meta { font-size: 11px; color: var(--muted); }
+.log-xp { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 20px; }
+.empty-msg { font-size: 12px; color: var(--muted); text-align: center; padding: 20px 0; }
+
+/* CALENDAR PAGE */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+}
+.cal-nav-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s;
+}
+.cal-nav-btn:hover { border-color: var(--accent); }
+
+.cal-grid-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.cal-wd { font-size: 10px; color: var(--muted); font-weight: 600; padding: 4px 0; letter-spacing: 0.06em; }
+.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cal-day:hover { background: var(--bg); }
+.cal-day.other-month { color: var(--border); }
+.cal-day.today { font-weight: 700; color: var(--accent); }
+.cal-day.has-session { background: rgba(45,106,79,0.08); }
+.cal-day.selected { background: var(--accent-light); color: var(--accent); font-weight: 700; }
+.cal-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent2); margin-top: 1px; }
+
+.cal-detail-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+.cal-detail-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: var(--text);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 11px 22px;
+  border-radius: 40px;
+  z-index: 999;
+  white-space: nowrap;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  letter-spacing: 0.04em;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* XP FLOAT */
+.xp-float {
+  position: fixed;
+  pointer-events: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--accent2);
+  animation: floatUp 1.2s ease-out forwards;
+  z-index: 1000;
+}
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-60px); }
+}
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 40px;
+  width: 100%;
+  max-width: 430px;
+}
+.modal h3 { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 16px; }
+.modal input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.modal input:focus { border-color: var(--accent); }
+.modal-btns { display: flex; gap: 8px; }
+.modal-ok { flex: 1; }
+.modal-cancel {
+  flex: 1;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 12px;
+  border-radius: 40px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('timer')">タイマー</button>
+  <button class="nav-btn" onclick="showPage('calendar')">カレンダー</button>
+  <button class="nav-btn" onclick="showPage('profile')">プロフィール</button>
+</nav>
+
+<!-- MODAL: add subject -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>科目を追加</h3>
+    <input type="text" id="newSubjectInput" placeholder="例：民法、英語、数学..." maxlength="12">
+    <div class="modal-btns">
+      <button class="btn-primary modal-ok" onclick="addSubject()">追加</button>
+      <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TIMER PAGE ===== -->
+<div class="page active" id="page-timer">
+  <!-- Player -->
+  <div class="player-header">
+    <div class="avatar-wrap" id="avatar">📖</div>
+    <div class="player-meta">
+      <div class="player-name" id="playerName">がんばれ！</div>
+      <div class="level-tag" id="levelTag">Lv.1 — 見習い</div>
+      <div class="xp-row">
+        <span>EXP</span>
+        <span id="xpLabel">0 / 200</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val" id="statH">0.0<span style="font-size:13px">h</span></div>
+      <div class="stat-lbl">総勉強時間</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statXP">0</div>
+      <div class="stat-lbl">総EXP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statStreak">0</div>
+      <div class="stat-lbl">連続日数</div>
+    </div>
+  </div>
+
+  <!-- Timer -->
+  <div class="sec-label">タイマー</div>
+  <div class="timer-card">
+    <div class="subject-pills" id="pillsContainer"></div>
+    <div class="timer-face" id="timerFace">00:00:00</div>
+    <div class="timer-sub" id="timerSub">10 XP / 分</div>
+    <div class="timer-btns">
+      <button class="btn-primary" id="btnStart" onclick="startTimer()">▶ 開始</button>
+      <button class="btn-secondary" id="btnStop" onclick="stopTimer()">■ 終了・保存</button>
+    </div>
+  </div>
+
+  <!-- Today log -->
+  <div class="sec-label">今日の記録</div>
+  <div class="log-card" id="todayLog">
+    <div class="empty-msg">まだ記録がありません</div>
+  </div>
+</div>
+
+<!-- ===== CALENDAR PAGE ===== -->
+<div class="page" id="page-calendar">
+  <div class="cal-header">
+    <button class="cal-nav-btn" onclick="moveMonth(-1)">‹</button>
+    <div class="cal-title" id="calTitle"></div>
+    <button class="cal-nav-btn" onclick="moveMonth(1)">›</button>
+  </div>
+  <div class="cal-grid-card">
+    <div class="cal-weekdays">
+      <div class="cal-wd">日</div><div class="cal-wd">月</div><div class="cal-wd">火</div>
+      <div class="cal-wd">水</div><div class="cal-wd">木</div><div class="cal-wd">金</div>
+      <div class="cal-wd">土</div>
+    </div>
+    <div class="cal-days" id="calDays"></div>
+  </div>
+  <div class="cal-detail-card" id="calDetail">
+    <div class="cal-detail-title" id="calDetailTitle">日付を選択</div>
+    <div id="calDetailContent"><div class="empty-msg">—</div></div>
+  </div>
+</div>
+
+<!-- ===== PROFILE PAGE ===== -->
+<div class="page" id="page-profile">
+  <div class="player-header">
+    <div class="avatar-wrap" id="avatar2">📖</div>
+    <div class="player-meta">
+      <div class="player-name" id="playerName2">がんばれ！</div>
+      <div class="level-tag" id="levelTag2">Lv.1 — 見習い</div>
+      <div class="xp-row">
+        <span>EXP</span>
+        <span id="xpLabel2">0 / 200</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill2" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:4px">スキルレベル</div>
+  <div class="skills-card" id="skillsCard">
+    <div class="empty-msg">科目を追加すると表示されます</div>
+  </div>
+</div>
+
+<script>
+// ===================== STATE =====================
+const LEVELS = [
+  { min:0,    max:200,  title:'見習い',       avatar:'📖' },
+  { min:200,  max:500,  title:'努力家',       avatar:'✏️' },
+  { min:500,  max:900,  title:'学習者',       avatar:'🔍' },
+  { min:900,  max:1400, title:'熟練者',       avatar:'📚' },
+  { min:1400, max:2100, title:'エキスパート',  avatar:'🎓' },
+  { min:2100, max:3000, title:'マスター',     avatar:'🏅' },
+  { min:3000, max:99999,title:'レジェンド',   avatar:'🏆' },
+];
+const XP_PER_MIN = 10;
+
+const STORAGE_KEY = 'levelup_study_v1';
+function loadState() {
+  try { const s = localStorage.getItem(STORAGE_KEY); if (s) return JSON.parse(s); } catch(e) {}
+  return null;
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+const _saved = loadState();
+let state = _saved || {
+  xp: 0, totalSec: 0, subjects: [], skills: {}, sessions: [], streakDays: 0,
+};
+
+// Timer
+let timerInterval = null;
+let sessionSec = 0;
+let xpAccum = 0;
+let isRunning = false;
+let currentSubject = '';
+
+// Calendar
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let selectedDate = null;
+
+// ===================== INIT =====================
+function init() {
+  currentSubject = state.subjects[0] || null;
+  renderPills();
+  renderSkills();
+  renderTodayLog();
+  renderCalendar();
+  updateUI();
+  calcStreak();
+}
+
+// ===================== NAV =====================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'calendar') renderCalendar();
+}
+
+// ===================== PILLS =====================
+function renderPills() {
+  const c = document.getElementById('pillsContainer');
+  c.innerHTML = '';
+  state.subjects.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'pill' + (s === currentSubject ? ' active' : '');
+    b.textContent = s;
+    b.onclick = () => { if (!isRunning) { currentSubject = s; renderPills(); } };
+    c.appendChild(b);
+  });
+  const add = document.createElement('button');
+  add.className = 'pill add-pill';
+  add.textContent = '＋ 追加';
+  add.onclick = () => openModal();
+  c.appendChild(add);
+}
+
+// ===================== MODAL =====================
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('newSubjectInput').value = '';
+  setTimeout(() => document.getElementById('newSubjectInput').focus(), 100);
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+document.getElementById('newSubjectInput').addEventListener('keydown', e => { if (e.key === 'Enter') addSubject(); });
+function addSubject() {
+  const val = document.getElementById('newSubjectInput').value.trim();
+  if (!val || state.subjects.includes(val)) { closeModal(); return; }
+  state.subjects.push(val);
+  if (!state.skills[val]) state.skills[val] = 0;
+  currentSubject = val;
+  renderPills();
+  renderSkills();
+  saveState();
+  closeModal();
+}
+
+// ===================== TIMER =====================
+function startTimer() {
+  if (!currentSubject) { showToast('科目を選んでください'); return; }
+  if (!state.skills[currentSubject]) state.skills[currentSubject] = 0;
+  isRunning = true;
+  sessionSec = 0;
+  xpAccum = 0;
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('btnStop').style.display = 'inline-block';
+  document.getElementById('timerFace').classList.add('running');
+  document.querySelectorAll('.pill:not(.add-pill)').forEach(p => p.style.pointerEvents = 'none');
+
+  timerInterval = setInterval(() => {
+    sessionSec++;
+    state.totalSec++;
+    xpAccum++;
+
+    if (xpAccum >= 60) {
+      xpAccum = 0;
+      const prevXP = state.xp;
+      state.xp += XP_PER_MIN;
+      state.skills[currentSubject] = Math.min(100, (state.skills[currentSubject] || 0) + 1);
+      updateUI(prevXP);
+      renderSkills();
+      saveState();
+      spawnFloat(`+${XP_PER_MIN} XP`);
+    }
+
+    updateTimerFace();
+    document.getElementById('statH').innerHTML = (state.totalSec / 3600).toFixed(1) + '<span style="font-size:13px">h</span>';
+  }, 1000);
+}
+
+function stopTimer() {
+  if (!isRunning) return;
+  clearInterval(timerInterval);
+  isRunning = false;
+
+  // Partial XP for leftover seconds (min 10s)
+  if (xpAccum >= 10) {
+    const partial = Math.round(XP_PER_MIN * xpAccum / 60);
+    if (partial > 0) {
+      const prevXP = state.xp;
+      state.xp += partial;
+      state.skills[currentSubject] = Math.min(100, (state.skills[currentSubject] || 0) + Math.ceil(partial / 10));
+      updateUI(prevXP);
+      renderSkills();
+    }
+  }
+
+  // Save session
+  if (sessionSec >= 5) {
+    const now = new Date();
+    const dateStr = toDateStr(now);
+    const timeStr = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    const sessionXP = Math.round(XP_PER_MIN * sessionSec / 60);
+    state.sessions.unshift({ subject: currentSubject, sec: sessionSec, xp: sessionXP, date: dateStr, time: timeStr });
+    calcStreak();
+    saveState();
+    renderTodayLog();
+    renderCalendar();
+  }
+
+  // Reset
+  sessionSec = 0;
+  document.getElementById('timerFace').textContent = '00:00:00';
+  document.getElementById('timerFace').classList.remove('running');
+  document.getElementById('btnStart').style.display = 'inline-block';
+  document.getElementById('btnStop').style.display = 'none';
+  document.querySelectorAll('.pill:not(.add-pill)').forEach(p => p.style.pointerEvents = '');
+}
+
+function updateTimerFace() {
+  const h = Math.floor(sessionSec / 3600);
+  const m = Math.floor((sessionSec % 3600) / 60);
+  const s = sessionSec % 60;
+  document.getElementById('timerFace').textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+}
+
+// ===================== XP / LEVEL =====================
+function getLevel(xp) {
+  for (let i = LEVELS.length - 1; i >= 0; i--)
+    if (xp >= LEVELS[i].min) return { lv: i + 1, ...LEVELS[i] };
+  return { lv: 1, ...LEVELS[0] };
+}
+
+function updateUI(prevXP) {
+  const lv = getLevel(state.xp);
+  const pct = Math.min(100, Math.round((state.xp - lv.min) / (lv.max - lv.min) * 100));
+  const tag = `Lv.${lv.lv} — ${lv.title}`;
+  const xpText = `${state.xp} / ${lv.max}`;
+
+  ['', '2'].forEach(sfx => {
+    const el = n => document.getElementById(n + sfx);
+    el('xpFill').style.width = pct + '%';
+    el('xpLabel').textContent = xpText;
+    el('levelTag').textContent = tag;
+    el('avatar').textContent = lv.avatar;
+  });
+
+  document.getElementById('statXP').textContent = state.xp;
+
+  if (prevXP !== undefined && getLevel(prevXP).lv < lv.lv)
+    showToast(`⬆ LEVEL UP!  Lv.${lv.lv} — ${lv.title}`);
+}
+
+// ===================== SKILLS =====================
+function renderSkills() {
+  const card = document.getElementById('skillsCard');
+  if (!state.subjects.length) { card.innerHTML = '<div class="empty-msg">科目を追加すると表示されます</div>'; return; }
+  card.innerHTML = state.subjects.map(s => {
+    const pct = state.skills[s] || 0;
+    return `<div class="skill-row">
+      <div class="skill-name">${s}</div>
+      <div class="skill-track"><div class="skill-fill" style="width:${pct}%"></div></div>
+      <div class="skill-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== TODAY LOG =====================
+function renderTodayLog() {
+  const today = toDateStr(new Date());
+  const items = state.sessions.filter(s => s.date === today);
+  const el = document.getElementById('todayLog');
+  if (!items.length) { el.innerHTML = '<div class="empty-msg">まだ記録がありません</div>'; return; }
+  el.innerHTML = items.map(s => {
+    const dur = formatDur(s.sec);
+    return `<div class="log-item">
+      <div class="log-left">
+        <div class="log-dot"></div>
+        <div>
+          <div class="log-subject">${s.subject}</div>
+          <div class="log-meta">${s.time} · ${dur}</div>
+        </div>
+      </div>
+      <div class="log-xp">+${s.xp} XP</div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== CALENDAR =====================
+function renderCalendar() {
+  const title = calYear + '年 ' + (calMonth + 1) + '月';
+  document.getElementById('calTitle').textContent = title;
+
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const days = new Date(calYear, calMonth + 1, 0).getDate();
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+  const todayStr = toDateStr(today);
+
+  const sessionDates = {};
+  state.sessions.forEach(s => { sessionDates[s.date] = (sessionDates[s.date] || 0) + s.xp; });
+
+  let html = '';
+  // Prev month
+  for (let i = first - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month">${prevDays - i}</div>`;
+  }
+  // Current month
+  for (let d = 1; d <= days; d++) {
+    const dateStr = calYear + '-' + pad(calMonth + 1) + '-' + pad(d);
+    const isToday = dateStr === todayStr;
+    const hasSess = !!sessionDates[dateStr];
+    const isSel = dateStr === selectedDate;
+    const cls = ['cal-day', isToday ? 'today' : '', hasSess ? 'has-session' : '', isSel ? 'selected' : ''].filter(Boolean).join(' ');
+    html += `<div class="${cls}" onclick="selectCalDay('${dateStr}')">
+      ${d}
+      ${hasSess ? '<div class="cal-dot"></div>' : ''}
+    </div>`;
+  }
+  // Next month padding
+  const total = first + days;
+  const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= rem; i++) html += `<div class="cal-day other-month">${i}</div>`;
+
+  document.getElementById('calDays').innerHTML = html;
+  if (selectedDate) renderCalDetail(selectedDate);
+}
+
+function selectCalDay(dateStr) {
+  selectedDate = dateStr;
+  renderCalendar();
+  renderCalDetail(dateStr);
+}
+
+function renderCalDetail(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  document.getElementById('calDetailTitle').textContent = `${parseInt(m)}月${parseInt(d)}日`;
+  const items = state.sessions.filter(s => s.date === dateStr);
+  const el = document.getElementById('calDetailContent');
+  if (!items.length) { el.innerHTML = '<div class="empty-msg">記録なし</div>'; return; }
+  const totalMin = Math.round(items.reduce((a, s) => a + s.sec, 0) / 60);
+  const totalXP = items.reduce((a, s) => a + s.xp, 0);
+  el.innerHTML = `<div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'DM Mono',monospace">${totalMin}分 · ${totalXP} XP</div>` +
+    items.map(s => `<div class="log-item">
+      <div class="log-left"><div class="log-dot"></div>
+        <div><div class="log-subject">${s.subject}</div>
+        <div class="log-meta">${s.time} · ${formatDur(s.sec)}</div></div>
+      </div>
+      <div class="log-xp">+${s.xp} XP</div>
+    </div>`).join('');
+}
+
+function moveMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+// ===================== STREAK =====================
+function calcStreak() {
+  const dates = [...new Set(state.sessions.map(s => s.date))].sort().reverse();
+  if (!dates.length) { state.streakDays = 0; document.getElementById('statStreak').textContent = 0; return; }
+  let streak = 0;
+  let cur = new Date(); cur.setHours(0,0,0,0);
+  for (const d of dates) {
+    const dd = new Date(d); dd.setHours(0,0,0,0);
+    const diff = Math.round((cur - dd) / 86400000);
+    if (diff === 0 || diff === 1) { streak++; cur = dd; }
+    else break;
+  }
+  state.streakDays = streak;
+  document.getElementById('statStreak').textContent = streak;
+}
+
+// ===================== UTILS =====================
+function pad(n) { return String(n).padStart(2, '0'); }
+function toDateStr(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function formatDur(sec) {
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  if (h > 0) return `${h}時間${m}分`;
+  if (m > 0) return `${m}分${s}秒`;
+  return `${s}秒`;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+function spawnFloat(text) {
+  const pop = document.createElement('div');
+  pop.className = 'xp-float';
+  pop.textContent = text;
+  pop.style.left = '50%';
+  pop.style.top = '42%';
+  pop.style.transform = 'translateX(-50%)';
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 1200);
+}
+
+init();
+</script>
+</body>
+</html>
